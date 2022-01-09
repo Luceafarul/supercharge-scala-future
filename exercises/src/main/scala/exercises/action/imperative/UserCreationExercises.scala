@@ -47,12 +47,15 @@ object UserCreationExercises {
   def readSubscribeToMailingList(): Boolean = {
     println("Would you like to subscribe to our mailing list? [Y/N]")
     val answer = StdIn.readLine()
-    answer.trim().toUpperCase() match {
+    parseYesNo(answer)
+  }
+
+  def parseYesNo(input: String): Boolean =
+    input.trim().toUpperCase() match {
       case "Y" => true
       case "N" => false
       case _   => throw new IllegalArgumentException("Answer with Y or N, please.")
     }
-  }
 
   // 2. How can we test `readSubscribeToMailingList`?
   // We cannot use example-based tests or property-based tests
@@ -102,9 +105,9 @@ object UserCreationExercises {
   def readUser(console: Console): User =
     ???
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // PART 2: Error handling
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // 5. Implement `readSubscribeToMailingListRetry` which behaves like
   // `readSubscribeToMailingList` but retries if the user enters an invalid input.
@@ -147,9 +150,9 @@ object UserCreationExercises {
   // 7. Update `readUser` so that it allows the user to make up to 2 mistakes (3 attempts)
   // when entering their date of birth and mailing list subscription flag.
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Bonus question (not covered by the videos)
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // 8. Implement `readSubscribeToMailingListRetry` using a while-loop instead of a recursion.
 

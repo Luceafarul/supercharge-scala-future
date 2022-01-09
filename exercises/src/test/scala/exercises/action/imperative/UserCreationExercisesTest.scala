@@ -17,6 +17,12 @@ import scala.util.{Failure, Success, Try}
 // testOnly exercises.action.imperative.UserCreationExercisesTest
 class UserCreationExercisesTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
+  test("parseYesNo") {
+    assert(parseYesNo("Y"))
+    assert(!parseYesNo("N"))
+    assert(Try(parseYesNo("Nope")).isFailure)
+  }
+
   ignore("readSubscribeToMailingList example") {
     val inputs  = ListBuffer("N")
     val outputs = ListBuffer.empty[String]
