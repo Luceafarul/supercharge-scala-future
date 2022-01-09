@@ -1,11 +1,13 @@
 package exercises.action.imperative
 
+import java.time.Instant
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate}
-
 import scala.annotation.tailrec
 import scala.io.StdIn
-import scala.util.{Failure, Success, Try}
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 // Run the App using the green arrow next to object (if using IntelliJ)
 // or run `sbt` in the terminal to open it in shell mode, then type:
@@ -50,6 +52,8 @@ object UserCreationExercises {
     parseYesNo(answer)
   }
 
+  def formatYesNo(yesNo: Boolean): String = if (yesNo) "Y" else "N"
+
   def parseYesNo(input: String): Boolean =
     input.trim().toUpperCase() match {
       case "Y" => true
@@ -66,8 +70,11 @@ object UserCreationExercises {
   // Then, try to test this version using property-based testing.
   // Note: Check the `Console` companion object.
   // Bonus: Try to write a property-based test for `readSubscribeToMailingList`
-  def readSubscribeToMailingList(console: Console): Boolean =
-    ???
+  def readSubscribeToMailingList(console: Console): Boolean = {
+    console.writeLine("Would you like to subscribe to our mailing list? [Y/N]")
+    val answer = console.readLine()
+    parseYesNo(answer)
+  }
 
   // 3. Implement `readDateOfBirth` which asks the date of birth of the user.
   // User must answer using the format `dd-mm-yyyy`, e.g. "18-03-2001" for 18th of March 2001.

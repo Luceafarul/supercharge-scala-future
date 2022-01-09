@@ -23,17 +23,19 @@ class UserCreationExercisesTest extends AnyFunSuite with ScalaCheckDrivenPropert
     assert(Try(parseYesNo("Nope")).isFailure)
   }
 
-  ignore("readSubscribeToMailingList example") {
-    val inputs  = ListBuffer("N")
-    val outputs = ListBuffer.empty[String]
-    val console = Console.mock(inputs, outputs)
-    val result  = readSubscribeToMailingList(console)
+  test("readSubscribeToMailingList example") {
+    forAll { (yesNo: Boolean) =>
+      val inputs  = ListBuffer(formatYesNo(yesNo))
+      val outputs = ListBuffer.empty[String]
+      val console = Console.mock(inputs, outputs)
+      val result  = readSubscribeToMailingList(console)
 
-    assert(result == false)
-    assert(outputs.toList == List("Would you like to subscribe to our mailing list? [Y/N]"))
+      assert(result == yesNo)
+      assert(outputs.toList == List("Would you like to subscribe to our mailing list? [Y/N]"))
+    }
   }
 
-  ignore("readSubscribeToMailingList example failure") {
+  test("readSubscribeToMailingList example failure") {
     val console = Console.mock(ListBuffer("Never"), ListBuffer())
     val result  = Try(readSubscribeToMailingList(console))
 
@@ -70,9 +72,9 @@ class UserCreationExercisesTest extends AnyFunSuite with ScalaCheckDrivenPropert
     assert(result == expected)
   }
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // PART 2: Error handling
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   ignore("readSubscribeToMailingListRetry negative maxAttempt") {
     val console = Console.mock(ListBuffer.empty[String], ListBuffer.empty[String])
