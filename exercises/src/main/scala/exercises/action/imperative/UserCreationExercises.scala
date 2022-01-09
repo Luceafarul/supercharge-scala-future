@@ -44,8 +44,14 @@ object UserCreationExercises {
   // Throws an exception.
   // Note: You can read a user input using `StdIn.readLine()`.
   // Note: You can use `throw new IllegalArgumentException("...")` to throw an exception.
-  def readSubscribeToMailingList(): Boolean =
-    ???
+  def readSubscribeToMailingList(): Boolean = {
+    println("Would you like to subscribe to our mailing list? [Y/N]")
+    val input = StdIn.readLine()
+    val answer = input.trim().toUpperCase()
+    if (answer == "N") false
+    else if (answer == "Y") true
+    else throw new IllegalArgumentException("Answer with Y or N, please.")
+  }
 
   // 2. How can we test `readSubscribeToMailingList`?
   // We cannot use example-based tests or property-based tests
