@@ -25,8 +25,16 @@ package object imperative {
   // Note: `action: => A` is a by-name parameter (see the Evaluation lesson).
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
   // Note: Tests are in the `exercises.action.imperative.ImperativeActionTest`
-  def retry[A](maxAttempt: Int)(action: => A): A =
-    ???
+  def retry[A](maxAttempt: Int)(action: => A): A = {
+    require(maxAttempt > 0, "maxAttempt must be greater than 0")
+
+    Try(action) match {
+      case Success(value) => value
+      case Failure(exception) =>
+        if (maxAttempt > 1) retry(maxAttempt - 1)(action)
+        else throw exception
+    }
+  }
 
   // 2. Refactor `readSubscribeToMailingListRetry` in `UserCreationExercises` using `retry`.
 
@@ -46,9 +54,9 @@ package object imperative {
 
   // 5. Refactor `readDateOfBirthRetry` using `retry` and `onError` in `UserCreationExercises`.
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Bonus questions (not covered by the video)
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // 6. Write a property based for `retry`. For example,
   // Step 1. Generate a function that throws an exception for the first `n` evaluations.
