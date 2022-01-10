@@ -27,4 +27,13 @@ class EvaluationTest extends AnyFunSuite {
     assert(counter == 2)
   }
 
+  test("a val is evaluated once when it was define") {
+    var counter  = 0
+    val action = counter += 1
+    assert(counter == 1)
+    action
+    assert(counter == 1)
+    action
+    assert(counter == 1)
+  }
 }
