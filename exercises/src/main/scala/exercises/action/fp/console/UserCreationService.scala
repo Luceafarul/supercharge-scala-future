@@ -20,6 +20,7 @@ object UserCreationServiceApp extends App {
 
 class UserCreationService(console: Console, clock: Clock) {
   import UserCreationService._
+  import console.{readLine, writeLine}
 
   // 1. `readName` works as we expect, but `IO` makes the code
   // more difficult to read by requiring:
@@ -31,32 +32,36 @@ class UserCreationService(console: Console, clock: Clock) {
   // Then, we'll refactor `readName` with `andThen`.
   // Note: You can find tests in `exercises.action.fp.console.UserCreationServiceTest`
   val readName: IO[String] =
-    console.writeLine("What's your name?") *> console.readLine
+    writeLine("What's your name?") *> readLine
 
   // 2. Refactor `readDateOfBirth` so that the code combines the three internal `IO`
   // instead of executing each `IO` one after another using `unsafeRun`.
   // For example, try to use `andThen`.
   // If it doesn't work investigate the methods `map` and `flatMap` on the `IO` trait.
   val readDateOfBirth: IO[LocalDate] =
-    console.writeLine("What's your date of birth? [dd-mm-yyyy]") *>
-      console.readLine.flatMap(parseDateOfBirth)
+    for {
+      _           <- writeLine("What's your date of birth? [dd-mm-yyyy]")
+      input       <- readLine
+      dateOfBirth <- parseDateOfBirth(input)
+    } yield dateOfBirth
 
   // 3. Refactor `readSubscribeToMailingList` and `readUser` using the same techniques as `readDateOfBirth`.
   val readSubscribeToMailingList: IO[Boolean] =
-    console.writeLine("Would you like to subscribe to our mailing list? [Y/N]") *>
-      console.readLine.flatMap(parseLineToBoolean)
+    for {
+      _         <- writeLine("Would you like to subscribe to our mailing list? [Y/N]")
+      input     <- readLine
+      subscribe <- parseLineToBoolean(input)
+    } yield subscribe
 
   val readUser: IO[User] =
-    readName.flatMap { name =>
-      readDateOfBirth.flatMap { date =>
-        readSubscribeToMailingList.flatMap { subscribed =>
-          clock.now.flatMap { now =>
-            val user = User(name, date, subscribed, now)
-            console.writeLine(s"User is $user").map(_ => user)
-          }
-        }
-      }
-    }
+    for {
+      name        <- readName
+      dateOfBirth <- readDateOfBirth
+      subscribed  <- readSubscribeToMailingList
+      now         <- clock.now
+      user = User(name, dateOfBirth, subscribed, now)
+      _ <- writeLine(s"User is $user")
+    } yield user
 
   // ////////////////////////////////////////////
   // PART 2: For Comprehension
