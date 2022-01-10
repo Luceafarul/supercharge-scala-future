@@ -143,10 +143,7 @@ object UserCreationExercises {
     retry(maxAttempt) {
       console.writeLine("Would you like to subscribe to our mailing list? [Y/N]")
       val answer = console.readLine()
-      Try(parseYesNo(answer)) match {
-        case Success(yesNo)     => yesNo
-        case Failure(exception) => console.writeLine(exception.getMessage); throw exception
-      }
+      onError(parseYesNo(answer), e => console.writeLine(e.getMessage))
     }
 
   // 6. Implement `readDateOfBirthRetry` which behaves like
