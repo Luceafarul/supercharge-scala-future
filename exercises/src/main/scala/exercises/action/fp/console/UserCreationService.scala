@@ -31,38 +31,31 @@ class UserCreationService(console: Console, clock: Clock) {
   // Then, we'll refactor `readName` with `andThen`.
   // Note: You can find tests in `exercises.action.fp.console.UserCreationServiceTest`
   val readName: IO[String] =
-    console
-      .writeLine("What's your name?")
-      .andThen(console.readLine)
+    console.writeLine("What's your name?") *> console.readLine
 
   // 2. Refactor `readDateOfBirth` so that the code combines the three internal `IO`
   // instead of executing each `IO` one after another using `unsafeRun`.
   // For example, try to use `andThen`.
   // If it doesn't work investigate the methods `map` and `flatMap` on the `IO` trait.
   val readDateOfBirth: IO[LocalDate] =
-    IO {
-      console.writeLine("What's your date of birth? [dd-mm-yyyy]").unsafeRun()
-      val line = console.readLine.unsafeRun()
-      parseDateOfBirth(line).unsafeRun()
-    }
+    console.writeLine("What's your date of birth? [dd-mm-yyyy]") *>
+      console.readLine.flatMap(parseDateOfBirth)
 
   // 3. Refactor `readSubscribeToMailingList` and `readUser` using the same techniques as `readDateOfBirth`.
   val readSubscribeToMailingList: IO[Boolean] =
-    IO {
-      console.writeLine("Would you like to subscribe to our mailing list? [Y/N]").unsafeRun()
-      val line = console.readLine.unsafeRun()
-      parseLineToBoolean(line).unsafeRun()
-    }
+    console.writeLine("Would you like to subscribe to our mailing list? [Y/N]") *>
+      console.readLine.flatMap(parseLineToBoolean)
 
   val readUser: IO[User] =
-    IO {
-      val name        = readName.unsafeRun()
-      val dateOfBirth = readDateOfBirth.unsafeRun()
-      val subscribed  = readSubscribeToMailingList.unsafeRun()
-      val now         = clock.now.unsafeRun()
-      val user        = User(name, dateOfBirth, subscribed, now)
-      console.writeLine(s"User is $user").unsafeRun()
-      user
+    readName.flatMap { name =>
+      readDateOfBirth.flatMap { date =>
+        readSubscribeToMailingList.flatMap { subscribed =>
+          clock.now.flatMap { now =>
+            val user = User(name, date, subscribed, now)
+            console.writeLine(s"User is $user").map(_ => user)
+          }
+        }
+      }
     }
 
   // ////////////////////////////////////////////

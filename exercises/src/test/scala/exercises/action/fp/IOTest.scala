@@ -39,7 +39,7 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 2) // first and second were executed in the expected order
   }
 
-  ignore("map") {
+  test("map") {
     var counter = 0
 
     val first  = IO(counter += 1)
@@ -50,7 +50,7 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 1) // first was executed
   }
 
-  ignore("flatMap") {
+  test("flatMap") {
     var counter = 0
 
     val first  = IO(counter += 1)
@@ -63,9 +63,9 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 2) // first and second were executed
   }
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // PART 3: Error handling
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   ignore("onError success") {
     var counter = 0
@@ -131,9 +131,9 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 2)
   }
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // PART 4: IO clean-up
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   ignore("attempt success") {
     var counter = 0
@@ -183,9 +183,9 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 2) // first and second were executed in the expected order
   }
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Search Flight Exercises
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   ignore("sequence") {
     var counter = 0
@@ -215,9 +215,9 @@ class IOTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     assert(counter == 5)
   }
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Concurrent IO
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // flaky
   ignore("parZip second faster than first") {

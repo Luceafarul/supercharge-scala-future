@@ -21,7 +21,7 @@ trait IO[A] {
   // prints "Fetching user", fetches user 1234 from db and returns it.
   // Note: There is a test for `andThen` in `exercises.action.fp.IOTest`.
   def andThen[Other](other: IO[Other]): IO[Other] =
-    IO { 
+    IO {
       this.unsafeRun()
       other.unsafeRun()
     }
@@ -33,7 +33,7 @@ trait IO[A] {
   //       Another popular symbol is <* so that `action1 <* action2`
   //       executes `action1` and then `action2` but returns the result of `action1`
   def *>[Other](other: IO[Other]): IO[Other] =
-    ???
+    andThen(other)
 
   // Runs the current action (`this`) and update the result with `callback`.
   // For example,
@@ -44,7 +44,7 @@ trait IO[A] {
   // Note: `callback` is expected to be an FP function (total, deterministic, no action).
   //       Use `flatMap` if `callBack` is not an FP function.
   def map[Next](callBack: A => Next): IO[Next] =
-    ???
+    IO(callBack(this.unsafeRun()))
 
   // Runs the current action (`this`), if it succeeds passes the result to `callback` and
   // runs the second action.
@@ -56,7 +56,7 @@ trait IO[A] {
   // Fetches the user with id 1234 from the database and send them an email using the email
   // address found in the database.
   def flatMap[Next](callback: A => IO[Next]): IO[Next] =
-    ???
+    IO(callback(this.unsafeRun()).unsafeRun())
 
   // Runs the current action, if it fails it executes `cleanup` and rethrows the original error.
   // If the current action is a success, it will return the result.
@@ -109,9 +109,9 @@ trait IO[A] {
   def handleErrorWith(callback: Throwable => IO[A]): IO[A] =
     ???
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Concurrent IO
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // Runs both the current IO and `other` sequentially,
   // then combine their results into a tuple
@@ -142,9 +142,9 @@ object IO {
   def fail[A](error: Throwable): IO[A] =
     IO(throw error)
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Search Flight Exercises
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   def sleep(duration: FiniteDuration): IO[Unit] =
     IO(Thread.sleep(duration.toMillis))
@@ -172,9 +172,9 @@ object IO {
   def traverse[A, B](values: List[A])(action: A => IO[B]): IO[List[B]] =
     sequence(values.map(action))
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Concurrent IO
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // Runs all the actions concurrently and collect the results in the same order.
   // For example,
