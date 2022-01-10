@@ -47,7 +47,7 @@ object UserCreationExercises {
     input.trim().toUpperCase() match {
       case "Y" => true
       case "N" => false
-      case _   => throw new IllegalArgumentException("Answer with Y or N, please.")
+      case _   => throw new IllegalArgumentException("""Incorrect format, enter "Y" for Yes or "N" for "No"""")
     }
 
   // 2. How can we test `readSubscribeToMailingList`?
@@ -139,8 +139,17 @@ object UserCreationExercises {
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
   // Note: You can implement the retry logic using recursion or a for/while loop. I suggest
   //       trying both possibilities.
-  def readSubscribeToMailingListRetry(console: Console, maxAttempt: Int): Boolean =
-    ???
+  def readSubscribeToMailingListRetry(console: Console, maxAttempt: Int): Boolean = {
+    val errorMessage = """Incorrect format, enter "Y" for Yes or "N" for "No""""
+    if (maxAttempt > 0)
+      try readSubscribeToMailingList(console)
+      catch {
+        case _: IllegalArgumentException =>
+          console.writeLine(errorMessage)
+          readSubscribeToMailingListRetry(console, maxAttempt - 1)
+      }
+    else throw new IllegalArgumentException(errorMessage)
+  }
 
   // 6. Implement `readDateOfBirthRetry` which behaves like
   // `readDateOfBirth` but retries when the user enters an invalid input.
