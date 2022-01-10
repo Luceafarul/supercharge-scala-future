@@ -38,20 +38,24 @@ class UserCreationService(console: Console, clock: Clock) {
   // instead of executing each `IO` one after another using `unsafeRun`.
   // For example, try to use `andThen`.
   // If it doesn't work investigate the methods `map` and `flatMap` on the `IO` trait.
-  val readDateOfBirth: IO[LocalDate] =
+  val readDateOfBirth: IO[LocalDate] = {
+    val printErrorMessage = writeLine("""Incorrect format, for example enter "18-03-2001" for 18th of March 2001""")
     for {
       _           <- writeLine("What's your date of birth? [dd-mm-yyyy]")
       input       <- readLine
-      dateOfBirth <- parseDateOfBirth(input)
+      dateOfBirth <- parseDateOfBirth(input).onError(_ => printErrorMessage)
     } yield dateOfBirth
+  }
 
   // 3. Refactor `readSubscribeToMailingList` and `readUser` using the same techniques as `readDateOfBirth`.
-  val readSubscribeToMailingList: IO[Boolean] =
+  val readSubscribeToMailingList: IO[Boolean] = {
+    val printErrorMessage = writeLine("""Incorrect format, enter "Y" for Yes or "N" for "No"""")
     for {
       _         <- writeLine("Would you like to subscribe to our mailing list? [Y/N]")
       input     <- readLine
-      subscribe <- parseLineToBoolean(input)
+      subscribe <- parseLineToBoolean(input).onError(_ => printErrorMessage)
     } yield subscribe
+  }
 
   val readUser: IO[User] =
     for {
