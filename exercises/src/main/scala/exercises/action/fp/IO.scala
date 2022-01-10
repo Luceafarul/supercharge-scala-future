@@ -92,7 +92,15 @@ trait IO[A] {
   // Note: `maxAttempt` must be greater than 0, otherwise the `IO` should fail.
   // Note: `retry` is a no-operation when `maxAttempt` is equal to 1.
   def retry(maxAttempt: Int): IO[A] =
-    ???
+    IO {
+      if (maxAttempt <= 0) throw new IllegalArgumentException("maxAttempt must be greater than 0")
+      else if (maxAttempt == 1) this.unsafeRun()
+      else
+        this.attempt.unsafeRun() match {
+          case Success(value)     => value
+          case Failure(exception) => this.retry(maxAttempt - 1).unsafeRun()
+        }
+    }
 
   // Checks if the current IO is a failure or a success.
   // For example,
