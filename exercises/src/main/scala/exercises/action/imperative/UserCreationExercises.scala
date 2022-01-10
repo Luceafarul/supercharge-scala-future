@@ -82,6 +82,9 @@ object UserCreationExercises {
     LocalDate.parse(console.readLine().trim(), dateOfBirthFormatter)
   }
 
+  private def parseDate(input: String): LocalDate =
+    LocalDate.parse(input.trim(), dateOfBirthFormatter)
+
   def readName(console: Console): String = {
     console.writeLine("What's your name?")
     console.readLine().trim() match {
@@ -161,18 +164,15 @@ object UserCreationExercises {
   // [Prompt] Incorrect format, for example enter "18-03-2001" for 18th of March 2001
   // Throws an exception because the user only had 1 attempt and they entered an invalid input.
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
-  @tailrec
-  def readDateOfBirthRetry(console: Console, maxAttempt: Int): LocalDate = {
-    val errorMessage = """Incorrect format, for example enter "18-03-2001" for 18th of March 2001"""
-    if (maxAttempt > 0)
-      Try(readDateOfBirth(console)) match {
-        case Success(dateOfBirth) => dateOfBirth
-        case Failure(exception) =>
-          console.writeLine(errorMessage)
-          readDateOfBirthRetry(console, maxAttempt - 1)
-      }
-    else throw new IllegalStateException(errorMessage)
-  }
+  def readDateOfBirthRetry(console: Console, maxAttempt: Int): LocalDate =
+    retry(maxAttempt) {
+      console.writeLine("What's your date of birth? [dd-mm-yyyy]")
+      val input = console.readLine()
+      onError(
+        parseDate(input),
+        _ => console.writeLine("""Incorrect format, for example enter "18-03-2001" for 18th of March 2001""")
+      )
+    }
 
   // 7. Update `readUser` so that it allows the user to make up to 2 mistakes (3 attempts)
   // when entering their date of birth and mailing list subscription flag.
