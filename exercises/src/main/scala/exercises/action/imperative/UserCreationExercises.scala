@@ -139,12 +139,13 @@ object UserCreationExercises {
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
   // Note: You can implement the retry logic using recursion or a for/while loop. I suggest
   //       trying both possibilities.
+  @tailrec
   def readSubscribeToMailingListRetry(console: Console, maxAttempt: Int): Boolean = {
     val errorMessage = """Incorrect format, enter "Y" for Yes or "N" for "No""""
     if (maxAttempt > 0)
       Try(readSubscribeToMailingList(console)) match {
         case Success(yesNo) => yesNo
-        case Failure(exception) => 
+        case Failure(exception) =>
           console.writeLine(exception.getMessage)
           readSubscribeToMailingListRetry(console, maxAttempt - 1)
       }
@@ -166,8 +167,17 @@ object UserCreationExercises {
   // [Prompt] Incorrect format, for example enter "18-03-2001" for 18th of March 2001
   // Throws an exception because the user only had 1 attempt and they entered an invalid input.
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
-  def readDateOfBirthRetry(console: Console, maxAttempt: Int): LocalDate =
-    ???
+  def readDateOfBirthRetry(console: Console, maxAttempt: Int): LocalDate = {
+    val errorMessage = """Incorrect format, for example enter "18-03-2001" for 18th of March 2001"""
+    if (maxAttempt > 0)
+      Try(readDateOfBirth(console)) match {
+        case Success(dateOfBirth) => dateOfBirth
+        case Failure(exception) =>
+          console.writeLine(errorMessage)
+          readDateOfBirthRetry(console, maxAttempt - 1)
+      }
+    else throw new IllegalStateException(errorMessage)
+  }
 
   // 7. Update `readUser` so that it allows the user to make up to 2 mistakes (3 attempts)
   // when entering their date of birth and mailing list subscription flag.
