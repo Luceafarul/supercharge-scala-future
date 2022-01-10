@@ -70,7 +70,12 @@ trait IO[A] {
   // IO(throw new Exception("Boom!")).onError(logError).unsafeRun()
   // prints "Got an error: Boom!" and throws new Exception("Boom!")
   def onError[Other](cleanup: Throwable => IO[Other]): IO[A] =
-    ???
+    IO {
+      this.attempt.unsafeRun() match {
+        case Success(value)     => value
+        case Failure(exception) => cleanup(exception).unsafeRun(); throw exception
+      }
+    }
 
   // Retries this action until either:
   // * It succeeds.
@@ -97,7 +102,7 @@ trait IO[A] {
   // 1. Success(User(1234, "Bob", ...)) if `action` was successful or
   // 2. Failure(new Exception("User 1234 not found")) if `action` throws an exception
   def attempt: IO[Try[A]] =
-    ???
+    IO(Try(this.unsafeRun()))
 
   // If the current IO is a success, do nothing.
   // If the current IO is a failure, execute `callback` and keep its result.
