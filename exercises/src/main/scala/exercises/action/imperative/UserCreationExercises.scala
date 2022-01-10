@@ -15,7 +15,7 @@ import scala.util.Try
 object UserCreationApp extends App {
   import UserCreationExercises._
 
-  // readUser()
+  readUser(Console.system, Clock.system)
 }
 
 object UserCreationExercises {
@@ -110,8 +110,8 @@ object UserCreationExercises {
   //       and update the signature of `readUser`.
   def readUser(console: Console, clock: Clock): User = {
     val name              = readName(console)
-    val dateOfBirth       = readDateOfBirth(console)
-    val emailSubscription = readSubscribeToMailingList(console)
+    val dateOfBirth       = readDateOfBirthRetry(console, maxAttempt = 3)
+    val emailSubscription = readSubscribeToMailingListRetry(console, maxAttempt = 3)
     val now               = clock.now()
     val user              = User(name, dateOfBirth, emailSubscription, now)
     console.writeLine(s"User is $user")
@@ -167,6 +167,7 @@ object UserCreationExercises {
   // [Prompt] Incorrect format, for example enter "18-03-2001" for 18th of March 2001
   // Throws an exception because the user only had 1 attempt and they entered an invalid input.
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
+  @tailrec
   def readDateOfBirthRetry(console: Console, maxAttempt: Int): LocalDate = {
     val errorMessage = """Incorrect format, for example enter "18-03-2001" for 18th of March 2001"""
     if (maxAttempt > 0)
