@@ -142,10 +142,10 @@ object UserCreationExercises {
   def readSubscribeToMailingListRetry(console: Console, maxAttempt: Int): Boolean = {
     val errorMessage = """Incorrect format, enter "Y" for Yes or "N" for "No""""
     if (maxAttempt > 0)
-      try readSubscribeToMailingList(console)
-      catch {
-        case _: IllegalArgumentException =>
-          console.writeLine(errorMessage)
+      Try(readSubscribeToMailingList(console)) match {
+        case Success(yesNo) => yesNo
+        case Failure(exception) => 
+          console.writeLine(exception.getMessage)
           readSubscribeToMailingListRetry(console, maxAttempt - 1)
       }
     else throw new IllegalArgumentException(errorMessage)
