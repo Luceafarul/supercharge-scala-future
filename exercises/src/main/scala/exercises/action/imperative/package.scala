@@ -25,16 +25,15 @@ package object imperative {
   // Note: `action: => A` is a by-name parameter (see the Evaluation lesson).
   // Note: `maxAttempt` must be greater than 0, if not you should throw an exception.
   // Note: Tests are in the `exercises.action.imperative.ImperativeActionTest`
-  def retry[A](maxAttempt: Int)(action: => A): A = {
-    require(maxAttempt > 0, "maxAttempt must be greater than 0")
-
-    Try(action) match {
-      case Success(value) => value
-      case Failure(exception) =>
-        if (maxAttempt > 1) retry(maxAttempt - 1)(action)
-        else throw exception
-    }
-  }
+  @tailrec
+  def retry[A](maxAttempt: Int)(action: => A): A =
+    if (maxAttempt <= 0) throw new IllegalArgumentException("maxAttempt must be greater than 0")
+    else if (maxAttempt == 1) action
+    else
+      Try(action) match {
+        case Success(value) => value
+        case Failure(_)     => retry(maxAttempt - 1)(action)
+      }
 
   // 2. Refactor `readSubscribeToMailingListRetry` in `UserCreationExercises` using `retry`.
 
