@@ -67,10 +67,7 @@ trait IO[A] {
   // IO(throw new Exception("Boom!")).onError(logError).unsafeRun()
   // prints "Got an error: Boom!" and throws new Exception("Boom!")
   def onError[Other](cleanup: Throwable => IO[Other]): IO[A] =
-    this.attempt.flatMap {
-      case Success(value)     => IO(value)
-      case Failure(exception) => cleanup(exception) *> IO.fail(exception)
-    }
+    this.handleErrorWith { e => cleanup(e) *> IO.fail(e) }
 
   // Retries this action until either:
   // * It succeeds.
@@ -89,11 +86,7 @@ trait IO[A] {
   def retry(maxAttempt: Int): IO[A] =
     if (maxAttempt <= 0) IO.fail(new IllegalArgumentException("maxAttempt must be greater than 0"))
     else if (maxAttempt == 1) this
-    else
-      this.attempt.flatMap {
-        case Success(value) => IO(value)
-        case Failure(_)     => this.retry(maxAttempt - 1)
-      }
+    else this.handleErrorWith(_ => retry(maxAttempt - 1))
 
   // Checks if the current IO is a failure or a success.
   // For example,
