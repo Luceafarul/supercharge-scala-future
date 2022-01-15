@@ -48,7 +48,14 @@ object SearchFlightService {
   def fromClients(clients: List[SearchFlightClient]): SearchFlightService =
     new SearchFlightService {
       def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
-        ???
+        clients
+          .foldLeft(IO(List.empty[Flight])) { (result, client) =>
+            for {
+              r   <- client.search(from, to, date)
+              acc <- result
+            } yield acc ++ r
+          }
+          .map(SearchResult(_))
     }
 
   // 5. Refactor `fromClients` using `sequence` or `traverse` from the `IO` companion object.
