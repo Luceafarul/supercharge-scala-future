@@ -45,12 +45,15 @@ object SearchFlightService {
   // a list of `SearchFlightClient`.
   // Note: You can use a recursion/loop/foldLeft to call all the clients and combine their results.
   // Note: We can assume `clients` to contain less than 100 elements.
+  // Note:
+  // map + flatten  == flatMap
+  // map + fold     == foldMap
+  // map + sequence == traverse
   def fromClients(clients: List[SearchFlightClient]): SearchFlightService =
     new SearchFlightService {
       def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
         clients
-          .map(_.search(from, to, date))
-          .sequence
+          .traverse(_.search(from, to, date))
           .map(_.flatten)
           .map(SearchResult(_))
     }
