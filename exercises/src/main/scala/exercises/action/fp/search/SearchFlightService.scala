@@ -49,12 +49,9 @@ object SearchFlightService {
     new SearchFlightService {
       def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
         clients
-          .foldLeft(IO(List.empty[Flight])) { (result, client) =>
-            for {
-              r   <- client.search(from, to, date)
-              acc <- result
-            } yield acc ++ r
-          }
+          .map(_.search(from, to, date))
+          .sequence
+          .map(_.flatten)
           .map(SearchResult(_))
     }
 

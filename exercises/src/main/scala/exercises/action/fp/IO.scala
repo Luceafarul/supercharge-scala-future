@@ -67,7 +67,7 @@ trait IO[A] {
   // IO(throw new Exception("Boom!")).onError(logError).unsafeRun()
   // prints "Got an error: Boom!" and throws new Exception("Boom!")
   def onError[Other](cleanup: Throwable => IO[Other]): IO[A] =
-    this.handleErrorWith { e => cleanup(e) *> IO.fail(e) }
+    this.handleErrorWith(e => cleanup(e) *> IO.fail(e))
 
   // Retries this action until either:
   // * It succeeds.
@@ -164,7 +164,12 @@ object IO {
   // If no error occurs, it returns the users in the same order:
   // List(User(1111, ...), User(2222, ...), User(3333, ...))
   def sequence[A](actions: List[IO[A]]): IO[List[A]] =
-    ???
+    actions.foldLeft(IO(List.empty[A])) { (acc, ioa) =>
+      for {
+        list <- acc
+        a    <- ioa
+      } yield list :+ a
+    }
 
   // `traverse` is a shortcut for `map` followed by `sequence`, similar to how
   // `flatMap`  is a shortcut for `map` followed by `flatten`

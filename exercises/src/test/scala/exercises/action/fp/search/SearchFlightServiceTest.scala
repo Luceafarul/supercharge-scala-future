@@ -3,14 +3,12 @@ package exercises.action.fp.search
 import exercises.action.DateGenerator.dateGen
 import exercises.action.fp.IO
 import exercises.action.fp.search.Airport._
-import exercises.action.fp.search.SearchFlightGenerator.{airportGen, clientGen, flightGen}
-import org.scalacheck.Arbitrary.arbitrary
+import exercises.action.fp.search.SearchFlightGenerator.{airportGen, clientGen}
 import org.scalacheck.Gen
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import java.time.{Duration, Instant, LocalDate}
-import scala.concurrent.TimeoutException
 import scala.util.Random
 
 // Run the test using the green arrow next to class name (if using IntelliJ)
