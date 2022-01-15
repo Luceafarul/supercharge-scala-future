@@ -26,8 +26,8 @@ object SearchFlightService {
     new SearchFlightService {
       def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
         for {
-          result1 <- client1.search(from, to, date)
-          result2 <- client2.search(from, to, date)
+          result1 <- client1.search(from, to, date) // .handleErrorWith(_ => IO(List.empty))
+          result2 <- client2.search(from, to, date) // .onError(_ => IO(List.empty))
         } yield SearchResult(result1 ++ result2)
     }
 

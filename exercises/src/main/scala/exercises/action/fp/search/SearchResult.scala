@@ -8,8 +8,10 @@ final case class SearchResult private (flights: List[Flight]) {
 }
 
 object SearchResult {
-  def apply(flights: List[Flight]): SearchResult =
-    new SearchResult(flights.sorted(bestOrdering))
+  def apply(flights: List[Flight]): SearchResult = {
+    val distinctWithLowerPrice = flights.groupBy(_.flightId).values.map(_.minBy(_.unitPrice)).toList
+    new SearchResult(distinctWithLowerPrice.sorted(bestOrdering))
+  }
 
   // Order by number of stops (0, 1, 2, ...) and then by price.
   // For example, sorting the following flights

@@ -1,10 +1,13 @@
 package exercises.action.fp.search
 
+import exercises.action.fp.IO
+import exercises.action.fp.search.Airport.{londonGatwick, parisOrly}
 import exercises.action.fp.search.SearchFlightGenerator._
 import org.scalacheck.Gen
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
+import java.time.{Duration, Instant, LocalDate}
 import scala.Ordering.Implicits._
 
 // Run the test using the green arrow next to class name (if using IntelliJ)
@@ -46,4 +49,18 @@ class SearchResultTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
     }
   }
 
+  test("apply should return unique flights by flightId and sorted by price") {
+    val now = Instant.now()
+
+    val flight1 = Flight("1", "BA", parisOrly, londonGatwick, now, Duration.ofMinutes(100), 0, 89.5, "")
+    val flight2 = Flight("2", "LH", parisOrly, londonGatwick, now, Duration.ofMinutes(105), 0, 96.5, "")
+    val flight3 = Flight("3", "BA", parisOrly, londonGatwick, now, Duration.ofMinutes(140), 1, 234.0, "")
+    val flight4 = Flight("3", "BA", parisOrly, londonGatwick, now, Duration.ofMinutes(130), 1, 230.0, "")
+    val flight5 = Flight("4", "LH", parisOrly, londonGatwick, now, Duration.ofMinutes(210), 2, 50.5, "")
+    val flight6 = Flight("4", "LH", parisOrly, londonGatwick, now, Duration.ofMinutes(210), 2, 55.5, "")
+
+    val result = SearchResult(List(flight6, flight5, flight4, flight1, flight2, flight3))
+
+    assert(result == SearchResult(List(flight1, flight2, flight4, flight5)))
+  }
 }
