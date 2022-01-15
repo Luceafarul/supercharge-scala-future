@@ -1,9 +1,8 @@
 package exercises.action.fp.search
 
-import java.time.LocalDate
 import exercises.action.fp.IO
 
-import scala.annotation.tailrec
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -26,8 +25,10 @@ object SearchFlightService {
   def fromTwoClients(client1: SearchFlightClient, client2: SearchFlightClient): SearchFlightService =
     new SearchFlightService {
       def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
-        ???
-
+        for {
+          result1 <- client1.search(from, to, date)
+          result2 <- client2.search(from, to, date)
+        } yield SearchResult(result1 ++ result2)
     }
 
   // 2. Several clients can return data for the same flight. For example, if we combine data
@@ -52,9 +53,9 @@ object SearchFlightService {
 
   // 5. Refactor `fromClients` using `sequence` or `traverse` from the `IO` companion object.
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Concurrent IO
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // 6. Each client's search request is executed sequentially - one after another.
   //    Here are the current execution steps of `fromTwoClients`
@@ -71,9 +72,9 @@ object SearchFlightService {
   //    4. receive list of flights from client 2
   //    5. aggregate results from client 1 and 2
 
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
   // Bonus question (not covered by the videos)
-  //////////////////////////////////////////////
+  // ////////////////////////////////////////////
 
   // 10. `fromClients` wait for the results from every single client. This means that
   // if one client is extremely slow, it will slow down the overall request.
