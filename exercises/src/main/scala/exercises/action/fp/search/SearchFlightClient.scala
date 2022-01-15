@@ -20,6 +20,6 @@ object SearchFlightClient {
   def constant(flights: IO[List[Flight]]): SearchFlightClient =
     new SearchFlightClient {
       def search(from: Airport, to: Airport, date: LocalDate): IO[List[Flight]] =
-        flights.handleErrorWith(_ => IO(List.empty))
+        flights.handleErrorWith(e => IO.debug(s"Error occurs: $e") *> IO(List.empty))
     }
 }

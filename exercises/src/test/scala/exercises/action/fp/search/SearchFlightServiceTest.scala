@@ -1,7 +1,11 @@
 package exercises.action.fp.search
 
+import exercises.action.DateGenerator.dateGen
 import exercises.action.fp.IO
 import exercises.action.fp.search.Airport._
+import exercises.action.fp.search.SearchFlightGenerator.{airportGen, clientGen, flightGen}
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
@@ -32,19 +36,12 @@ class SearchFlightServiceTest extends AnyFunSuite with ScalaCheckDrivenPropertyC
   }
 
   test("fromTwoClients failure example") {
-    val now   = Instant.now()
-    val today = LocalDate.now()
+    forAll(airportGen, airportGen, dateGen, clientGen, clientGen) { (from, to, date, client1, client2) =>
+      val service = SearchFlightService.fromTwoClients(client1, client2)
+      val result  = service.search(from, to, date).attempt.unsafeRun()
 
-    val flight1 = Flight("2", "LH", parisOrly, londonGatwick, now, Duration.ofMinutes(105), 0, 96.5, "")
-    val flight2 = Flight("4", "LH", parisOrly, londonGatwick, now, Duration.ofMinutes(210), 2, 55.5, "")
-
-    val client1 = SearchFlightClient.constant(IO(throw new TimeoutException("Failed to retrieve data from client")))
-    val client2 = SearchFlightClient.constant(IO(List(flight1, flight2)))
-
-    val service = SearchFlightService.fromTwoClients(client1, client2)
-    val result  = service.search(parisOrly, londonGatwick, today).unsafeRun()
-
-    assert(result == SearchResult(List(flight1, flight2)))
+      assert(result.isSuccess)
+    }
   }
 
 }
