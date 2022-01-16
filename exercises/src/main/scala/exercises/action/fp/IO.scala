@@ -7,10 +7,23 @@ import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success, Try}
 
 trait IO[A] {
+  // This is the ONLY abstract method of the `IO` trait.
+  def unsafeRunAsync(callback: Try[A] => Unit): Unit
 
   // Executes the action.
-  // This is the ONLY abstract method of the `IO` trait.
-  def unsafeRun(): A
+  def unsafeRun(): A = {
+    var result: Option[Try[A]] = None
+    val latch                  = new CountDownLatch(1)
+
+    unsafeRunAsync { tryA =>
+      result = Some(tryA)
+      latch.countDown()
+    }
+
+    latch.await()
+
+    result.get.get
+  }
 
   // Runs the current IO (`this`), discards its result and runs the second IO (`other`).
   // For example,
@@ -138,13 +151,20 @@ trait IO[A] {
 }
 
 object IO {
+  def async[A](onComplete: (Try[A] => Unit) => Unit): IO[A] = new IO[A] {
+    def unsafeRunAsync(callback: Try[A] => Unit): Unit =
+      onComplete(callback)
+  }
+
   // Constructor for IO. For example,
   // val greeting: IO[Unit] = IO { println("Hello") }
   // greeting.unsafeRun()
   // prints "Hello"
-  def apply[A](action: => A): IO[A] =
-    new IO[A] {
-      def unsafeRun(): A = action
+  def apply[A](action: => A): IO[A] = async(callback => callback(Try(action)))
+
+  def dispatch[A](action: => A)(ec: ExecutionContext): IO[A] =
+    async { callback =>
+      ec.execute(() => callback(Try(action)))
     }
 
   // Construct an IO which throws `error` everytime it is called.
