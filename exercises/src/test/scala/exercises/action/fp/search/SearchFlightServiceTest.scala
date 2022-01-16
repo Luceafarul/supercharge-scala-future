@@ -9,6 +9,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import java.time.{Duration, Instant, LocalDate}
+import scala.concurrent.ExecutionContext.global
 import scala.util.Random
 
 // Run the test using the green arrow next to class name (if using IntelliJ)
@@ -28,7 +29,7 @@ class SearchFlightServiceTest extends AnyFunSuite with ScalaCheckDrivenPropertyC
     val client1 = SearchFlightClient.constant(IO(List(flight3, flight1)))
     val client2 = SearchFlightClient.constant(IO(List(flight2, flight4)))
 
-    val service = SearchFlightService.fromTwoClients(client1, client2)
+    val service = SearchFlightService.fromTwoClients(client1, client2)(global)
     val result  = service.search(parisOrly, londonGatwick, today).unsafeRun()
 
     assert(result == SearchResult(List(flight1, flight2, flight3, flight4)))
@@ -36,7 +37,7 @@ class SearchFlightServiceTest extends AnyFunSuite with ScalaCheckDrivenPropertyC
 
   test("fromTwoClients should handle errors") {
     forAll(airportGen, airportGen, dateGen, clientGen, clientGen) { (from, to, date, client1, client2) =>
-      val service = SearchFlightService.fromTwoClients(client1, client2)
+      val service = SearchFlightService.fromTwoClients(client1, client2)(global)
       val result  = service.search(from, to, date).attempt.unsafeRun()
 
       assert(result.isSuccess)

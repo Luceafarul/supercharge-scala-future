@@ -22,13 +22,28 @@ object SearchFlightService {
   // (see `SearchResult` companion object).
   // Note: A example based test is defined in `SearchFlightServiceTest`.
   //       You can also defined tests for `SearchResult` in `SearchResultTest`
-  def fromTwoClients(client1: SearchFlightClient, client2: SearchFlightClient): SearchFlightService =
+  def fromTwoClients(
+    client1: SearchFlightClient,
+    client2: SearchFlightClient
+  )(implicit
+    ec: ExecutionContext
+  ): SearchFlightService =
     new SearchFlightService {
-      def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
-        for {
-          result1 <- client1.search(from, to, date)
-          result2 <- client2.search(from, to, date)
-        } yield SearchResult(result1 ++ result2)
+      def search(
+        from: Airport,
+        to: Airport,
+        date: LocalDate
+      ): IO[SearchResult] =
+        client1
+          .search(from, to, date)
+          .parZip(client2.search(from, to, date))
+          .map { case (result1, result2) =>
+            SearchResult(result1 ++ result2)
+          }
+//        for {
+//          result1 <- client1.search(from, to, date)
+//          result2 <- client2.search(from, to, date)
+//        } yield SearchResult(result1 ++ result2)
     }
 
   // 2. Several clients can return data for the same flight. For example, if we combine data
@@ -51,7 +66,11 @@ object SearchFlightService {
   // map + sequence == traverse
   def fromClients(clients: List[SearchFlightClient]): SearchFlightService =
     new SearchFlightService {
-      def search(from: Airport, to: Airport, date: LocalDate): IO[SearchResult] =
+      def search(
+        from: Airport,
+        to: Airport,
+        date: LocalDate
+      ): IO[SearchResult] =
         clients
           .traverse(_.search(from, to, date))
           .map(_.flatten)
@@ -88,7 +107,9 @@ object SearchFlightService {
   // Implement a timeout per client so that the service doesn't spend more than
   // 500 milliseconds per client.
   // Note: Move `timeout` to the IO class once it is implemented.
-  def timeout[A](io: IO[A], duration: FiniteDuration)(ec: ExecutionContext): IO[A] =
+  def timeout[A](io: IO[A], duration: FiniteDuration)(
+    ec: ExecutionContext
+  ): IO[A] =
     ???
 
   // 11. Clients may occasionally return invalid data. For example, one may returns flights for
