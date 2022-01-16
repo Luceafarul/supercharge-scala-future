@@ -65,8 +65,13 @@ trait IO[A] {
   // action.unsafeRun()
   // Fetches the user with id 1234 from the database and send them an email using the email
   // address found in the database.
-  def flatMap[Next](callback: A => IO[Next]): IO[Next] =
-    IO(callback(this.unsafeRun()).unsafeRun())
+  def flatMap[Next](next: A => IO[Next]): IO[Next] =
+    IO.async { callback =>
+      this.unsafeRunAsync {
+        case Failure(exception) => callback(Failure(exception))
+        case Success(value)     => next(value).unsafeRunAsync(tryNext => callback(tryNext))
+      }
+    }
 
   // Runs the current action, if it fails it executes `cleanup` and rethrows the original error.
   // If the current action is a success, it will return the result.
@@ -140,11 +145,19 @@ trait IO[A] {
   // then combine their results into a tuple
   def parZip[Other](other: IO[Other])(implicit ec: ExecutionContext): IO[(A, Other)] =
     IO.async { f =>
-      Future(this.unsafeRun())
-        .zip(Future(other.unsafeRun()))
-        .map { case (first, second) =>
-          first -> second
-        }
+      val promise1: Promise[A]     = Promise()
+      val promise2: Promise[Other] = Promise()
+
+      ec.execute { () =>
+        this.unsafeRunAsync(tryA => promise1.complete(tryA))
+      }
+
+      ec.execute { () =>
+        other.unsafeRunAsync(tryOther => promise2.complete(tryOther))
+      }
+
+      promise1.future
+        .zip(promise2.future)
         .onComplete(f)
     }
 
