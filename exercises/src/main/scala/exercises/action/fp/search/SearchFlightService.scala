@@ -40,10 +40,6 @@ object SearchFlightService {
           .map { case (result1, result2) =>
             SearchResult(result1 ++ result2)
           }
-//        for {
-//          result1 <- client1.search(from, to, date)
-//          result2 <- client2.search(from, to, date)
-//        } yield SearchResult(result1 ++ result2)
     }
 
   // 2. Several clients can return data for the same flight. For example, if we combine data
@@ -64,7 +60,7 @@ object SearchFlightService {
   // map + flatten  == flatMap
   // map + fold     == foldMap
   // map + sequence == traverse
-  def fromClients(clients: List[SearchFlightClient]): SearchFlightService =
+  def fromClients(clients: List[SearchFlightClient])(implicit ec: ExecutionContext): SearchFlightService =
     new SearchFlightService {
       def search(
         from: Airport,
@@ -72,7 +68,7 @@ object SearchFlightService {
         date: LocalDate
       ): IO[SearchResult] =
         clients
-          .traverse(_.search(from, to, date))
+          .parTraverse(_.search(from, to, date))(ec)
           .map(_.flatten)
           .map(SearchResult(_))
     }
